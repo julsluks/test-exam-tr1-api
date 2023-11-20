@@ -9,10 +9,6 @@ use App\Http\Controllers\AuthController;
 // Route::resource("todo", TodoController::class);
 
 // Public routes
-    // Todo
-    Route::get('/todo', [TodoController::class, 'index']);
-    Route::get('/todo/{id}', [TodoController::class, 'show']);
-    Route::get("/todo/search/{title}", [TodoController::class,"search"]);
     // Auth
     Route::post("/register", [AuthController::class,"register"]);
     Route::post("/login", [AuthController::class,"login"]);
@@ -20,9 +16,10 @@ use App\Http\Controllers\AuthController;
 //Protected routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
     //Todo
-    Route::post("/todo", [TodoController::class,"store"]);
-    Route::put("/todo/{id}", [TodoController::class,"update"]);
-    Route::delete("/todo/{id}", [TodoController::class,"destroy"]);
+    Route::post("/addSnippet", [TodoController::class,"store"]);
+    Route::put("/update/{id}/{user}", [TodoController::class,"update"]);
+    Route::get("/getAll/{userId}", [TodoController::class,"index"]);
+    Route::get("/getSnippet/{id}/{user}", [TodoController::class,"show"]);
     //Auth
     Route::post("/logout", [AuthController::class,"logout"]);
 });

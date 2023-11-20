@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('description');
+            $table->integer('user')->unsigned();
+            $table->boolean('public')->default(false);
             $table->timestamps();
         });
     }

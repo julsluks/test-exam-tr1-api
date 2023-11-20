@@ -8,12 +8,25 @@ use Illuminate\Support\Facades\Validator;
 
 class TodoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    
+    public function index(string $user_id)
     {
-        return Todo::all();
+
+        $todosUser = Todo::where("user", $user_id)->get();
+        $todosPublics = Todo::where("public", !0)->get();
+
+        for ($i = 0; $i < count($todosPublics); $i++) {
+            if ($todosPublics[$i]->user == $user_id) {
+                unset($todosPublics[$i]);
+            }
+        }
+
+        $data = [
+            "SnippetsUser"=> $todosUser,
+            "SnippetsPublicos"=> $todosPublics
+        ];
+
+        return $data;
     }
 
     /**
@@ -29,22 +42,36 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = Validator::make($request->all(), [
-            "title" => "required"
+        $fields = $request->validate([
+            'title' => 'required|string',
+            'description'=> 'required|string',
+            'user'=> 'required',
+            'public'=> 'required',
         ]);
-        if ($validate->fails()) {
-            return "error, name is required";
-        }
 
-        return Todo::create($request->all());
+        //PUBLIC 0 = FALSE // OTRO = TRUE
+
+        $todo = Todo::create([
+            'title'=> $fields['title'],
+            'description'=> $fields['description'],
+            'user'=> $fields['user'],
+            'public' => $fields['public']
+        ]);
+
+        return $todo;
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, string $user_id)
     {
-        return Todo::find($id);
+        $todo = Todo::find($id);
+        if ($user_id == $todo->user || $todo->public == !0) {
+            return $todo;
+        }
+
+        return "error";
     }
 
     /**
@@ -58,11 +85,15 @@ class TodoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id, string $user_id)
     {
         $todo = Todo::find($id);
-        $todo->update($request->all());
-        return $todo;
+        if ($user_id == $todo->user) {
+            $todo->update($request->all());
+            return $todo;
+        }
+
+        return "error";
     }
 
     /**
